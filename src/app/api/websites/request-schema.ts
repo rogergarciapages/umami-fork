@@ -35,11 +35,45 @@ export const createWebsiteRequestSchema = z
   })
   .meta({ id: 'CreateWebsiteRequest' });
 
+export const shareConfigInputSchema = z
+  .object({
+    brandName: z.string().trim().max(100).optional(),
+    logoUrl: z.string().trim().max(300000).optional(),
+    primaryColor: z
+      .string()
+      .trim()
+      .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
+      .optional()
+      .or(z.literal('')),
+    backgroundColor: z
+      .string()
+      .trim()
+      .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
+      .optional()
+      .or(z.literal('')),
+    cardBackgroundColor: z
+      .string()
+      .trim()
+      .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
+      .optional()
+      .or(z.literal('')),
+    textColor: z
+      .string()
+      .trim()
+      .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
+      .optional()
+      .or(z.literal('')),
+    defaultTheme: z.enum(['system', 'light', 'dark']).optional(),
+    hideUmamiBranding: z.boolean().optional(),
+  })
+  .meta({ id: 'ShareConfigInput' });
+
 export const updateWebsiteRequestSchema = z
   .object({
     name: z.string().trim().min(1).max(100).optional(),
     domain: z.string().trim().regex(DOMAIN_REGEX).max(500).optional(),
     shareId: z.string().max(50).nullable().optional(),
     replayConfig: replayConfigInputSchema.nullable().optional(),
+    shareConfig: shareConfigInputSchema.nullable().optional(),
   })
   .meta({ id: 'UpdateWebsiteRequest' });

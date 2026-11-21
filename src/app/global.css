@@ -65,6 +65,22 @@ select:is(:-webkit-autofill, :autofill):focus {
   gap: 8px;
 }
 
+/* White-Label Share Branding */
+.share-branded-container {
+  --zen-primary: var(--share-primary, oklch(62.3% 0.214 259.815));
+  --zen-surface-raised: var(--share-bg, var(--zen-surface-raised));
+  --zen-surface: var(--share-card-bg, var(--zen-surface));
+  --zen-fg: var(--share-text-color, var(--zen-fg));
+  min-height: 100vh;
+  width: 100%;
+}
+
+.share-branded-container [data-theme="light"],
+.share-branded-container [data-theme="dark"],
+.share-branded-container .dark {
+  --zen-primary: var(--share-primary, oklch(62.3% 0.214 259.815));
+}
+
 [data-theme="dark"] .rr-controller__btns button {
   color: black;
 }

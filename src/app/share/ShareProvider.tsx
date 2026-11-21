@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createContext, type ReactNode, useEffect } from 'react';
 import { useShareTokenQuery } from '@/components/hooks';
 import { ENTITY_TYPE } from '@/lib/constants';
-import type { ShareParameters, WhiteLabel } from '@/lib/types';
+import type { ShareConfig, ShareParameters, WhiteLabel } from '@/lib/types';
 import { setShareData, useApp } from '@/store/app';
 
 export interface ShareData {
@@ -19,6 +19,7 @@ export interface ShareData {
   parameters: ShareParameters;
   token: string;
   whiteLabel?: WhiteLabel;
+  shareConfig?: ShareConfig;
 }
 
 export const ShareContext = createContext<ShareData>(null);

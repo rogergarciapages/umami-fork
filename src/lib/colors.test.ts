@@ -70,4 +70,10 @@ describe('getThemeColors', () => {
     const result = getThemeColors('dark');
     expect(result.colors.theme).toMatchObject({ fill: '#191919' });
   });
+
+  test('uses primaryColorOverride if provided', () => {
+    const result = getThemeColors('light', '#6366f1');
+    expect(result.colors.theme.primary).toBe('#6366f1');
+    expect(result.colors.map.baseColor).toBe('#6366f1');
+  });
 });

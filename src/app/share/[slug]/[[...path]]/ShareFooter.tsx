@@ -6,6 +6,10 @@ import { ShareBranding } from './ShareBranding';
 export function ShareFooter() {
   const share = useShare();
 
+  if (share?.shareConfig?.hideUmamiBranding ?? false) {
+    return null;
+  }
+
   if (!share?.whiteLabel) {
     return null;
   }

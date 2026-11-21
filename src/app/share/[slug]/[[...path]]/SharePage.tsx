@@ -73,16 +73,43 @@ export function SharePage() {
   const router = useRouter();
   const pathname = usePathname();
   const path = getSharePath(pathname);
-  const { slug, websiteId, boardId, pixelId, linkId, parameters = {}, shareType } = share;
-  const shareTheme = getShareTheme(parameters);
+  const { slug, websiteId, boardId, pixelId, linkId, parameters = {}, shareType, shareConfig } = share;
+  const shareTheme =
+    shareConfig?.defaultTheme && shareConfig.defaultTheme !== 'system'
+      ? (shareConfig.defaultTheme as 'light' | 'dark')
+      : getShareTheme(parameters);
 
   useEffect(() => {
-    initTheme(shareTheme, 'system');
+    initTheme(shareTheme, shareConfig?.defaultTheme || 'system');
 
     return () => {
       initTheme(undefined, 'system');
     };
-  }, [shareTheme, initTheme]);
+  }, [shareTheme, shareConfig?.defaultTheme, initTheme]);
+
+  const shareStyles = useMemo<React.CSSProperties>(() => {
+    if (!shareConfig) return {};
+    const styles: Record<string, string> = {};
+    if (shareConfig.primaryColor) {
+      styles['--share-primary'] = shareConfig.primaryColor;
+      styles['--zen-primary'] = shareConfig.primaryColor;
+    }
+    if (shareConfig.backgroundColor) {
+      styles['--share-bg'] = shareConfig.backgroundColor;
+      styles['--zen-surface-raised'] = shareConfig.backgroundColor;
+      styles['backgroundColor'] = shareConfig.backgroundColor;
+    }
+    if (shareConfig.cardBackgroundColor) {
+      styles['--share-card-bg'] = shareConfig.cardBackgroundColor;
+      styles['--zen-surface'] = shareConfig.cardBackgroundColor;
+    }
+    if (shareConfig.textColor) {
+      styles['--share-text-color'] = shareConfig.textColor;
+      styles['--zen-fg'] = shareConfig.textColor;
+      styles['color'] = shareConfig.textColor;
+    }
+    return styles as React.CSSProperties;
+  }, [shareConfig]);
 
   // Check if the requested path is allowed
   const pageKey = path || '';
@@ -106,10 +133,12 @@ export function SharePage() {
 
   if (entityPage) {
     return (
-      <Column>
-        {entityPage}
-        <ShareFooter />
-      </Column>
+      <div className="share-branded-container" style={shareStyles}>
+        <Column>
+          {entityPage}
+          <ShareFooter />
+        </Column>
+      </div>
     );
   }
 
@@ -120,25 +149,27 @@ export function SharePage() {
   const PageComponent = PAGE_COMPONENTS[pageKey] || WebsitePage;
 
   return (
-    <Grid columns={{ base: '1fr', lg: `${navCollapsed ? '60px' : '240px'} 1fr` }} width="100%">
-      <Row display={{ base: 'flex', lg: 'none' }} alignItems="center" gap padding="3">
-        <MobileMenuButton>
-          {({ close }) => {
-            return <ShareNav onItemClick={close} />;
-          }}
-        </MobileMenuButton>
-      </Row>
-      <Column display={{ base: 'none', lg: 'flex' }} marginRight="2">
-        <ShareNav collapsed={navCollapsed} onCollapse={handleCollapse} />
-      </Column>
-      <PageBody gap>
-        <WebsiteProvider websiteId={websiteId}>
-          <Column>
-            <WebsiteHeader showActions={false} allowLink={false} />
-            <PageComponent websiteId={websiteId} />
-          </Column>
-        </WebsiteProvider>
-      </PageBody>
-    </Grid>
+    <div className="share-branded-container" style={shareStyles}>
+      <Grid columns={{ base: '1fr', lg: `${navCollapsed ? '60px' : '240px'} 1fr` }} width="100%">
+        <Row display={{ base: 'flex', lg: 'none' }} alignItems="center" gap padding="3">
+          <MobileMenuButton>
+            {({ close }) => {
+              return <ShareNav onItemClick={close} />;
+            }}
+          </MobileMenuButton>
+        </Row>
+        <Column display={{ base: 'none', lg: 'flex' }} marginRight="2">
+          <ShareNav collapsed={navCollapsed} onCollapse={handleCollapse} />
+        </Column>
+        <PageBody gap>
+          <WebsiteProvider websiteId={websiteId}>
+            <Column>
+              <WebsiteHeader showActions={false} allowLink={false} />
+              <PageComponent websiteId={websiteId} />
+            </Column>
+          </WebsiteProvider>
+        </PageBody>
+      </Grid>
+    </div>
   );
 }

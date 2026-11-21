@@ -150,6 +150,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     entity = await getWebsite(share.entityId);
     if (!entity) return notFound();
     data.websiteId = share.entityId;
+    if (entity.shareConfig) {
+      data.shareConfig = entity.shareConfig;
+    }
   } else if (share.shareType === ENTITY_TYPE.pixel) {
     entity = await getPixel(share.entityId);
     if (!entity) return notFound();

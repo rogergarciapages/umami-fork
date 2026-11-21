@@ -1,7 +1,7 @@
 import { useTheme } from '@umami/react-zen';
 import { useCallback, useMemo } from 'react';
 import { BarChart, type BarChartProps } from '@/components/charts/BarChart';
-import { useLocale, useMessages } from '@/components/hooks';
+import { useLocale, useMessages, useShare, useWebsite } from '@/components/hooks';
 import { renderDateLabels } from '@/lib/charts';
 import { getThemeColors } from '@/lib/colors';
 import { generateTimeSeries } from '@/lib/date';
@@ -22,7 +22,11 @@ export function PageviewsChart({ data, unit, minDate, maxDate, ...props }: Pagev
   const { t, labels } = useMessages();
   const { theme } = useTheme();
   const { locale, dateLocale } = useLocale();
-  const { colors } = useMemo(() => getThemeColors(theme), [theme]);
+  const share = useShare();
+  const website = useWebsite();
+  const primaryColor =
+    share?.shareConfig?.primaryColor || (website as any)?.shareConfig?.primaryColor;
+  const { colors } = useMemo(() => getThemeColors(theme, primaryColor), [theme, primaryColor]);
 
   const chartData: any = useMemo(() => {
     if (!data) return;

@@ -109,6 +109,7 @@ model Website {
 
   recorderEnabled Boolean @default(false) @map("recorder_enabled")
   replayConfig    Json?   @map("replay_config")
+  shareConfig     Json?   @map("share_config")
 
   user                User?                @relation("user", fields: [userId], references: [id])
   createUser          User?                @relation("createUser", fields: [createdBy], references: [id])

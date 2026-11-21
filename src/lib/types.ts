@@ -399,3 +399,14 @@ export interface WhiteLabel {
   domainName: string;
   logoUrl: string;
 }
+
+export interface ShareConfig {
+  brandName?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  backgroundColor?: string;
+  cardBackgroundColor?: string;
+  textColor?: string;
+  defaultTheme?: 'system' | 'light' | 'dark';
+  hideUmamiBranding?: boolean;
+}

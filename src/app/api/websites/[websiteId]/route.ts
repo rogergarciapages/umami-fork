@@ -47,7 +47,7 @@ export async function POST(
   }
 
   const { websiteId } = await params;
-  const { name, domain, shareId, replayConfig } = body;
+  const { name, domain, shareId, replayConfig, shareConfig } = body;
 
   if (!(await canUpdateWebsite(auth, websiteId))) {
     return unauthorized();
@@ -75,6 +75,9 @@ export async function POST(
       ...(replayConfig !== undefined && {
         replayConfig: nextReplayConfig as Prisma.InputJsonObject,
         recorderEnabled: getRecorderEnabled(nextReplayConfig),
+      }),
+      ...(shareConfig !== undefined && {
+        shareConfig: (shareConfig === null ? Prisma.DbNull : shareConfig) as any,
       }),
     });
 

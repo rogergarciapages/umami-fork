@@ -57,14 +57,17 @@ export function getColor(seed: string, min: number = 0, max: number = 255) {
   return rgb2Hex(r, g, b);
 }
 
-export function getThemeColors(theme: string) {
-  const { primary, text, line, fill } = THEME_COLORS[theme];
-  const primaryColor = colord(THEME_COLORS[theme].primary);
+export function getThemeColors(theme: string, primaryColorOverride?: string) {
+  const themeObj = THEME_COLORS[theme] || THEME_COLORS.light;
+  const primary = primaryColorOverride || themeObj.primary;
+  const { text, line, fill } = themeObj;
+  const primaryColor = colord(primary);
 
   return {
     colors: {
       theme: {
-        ...THEME_COLORS[theme],
+        ...themeObj,
+        primary,
       },
       chart: {
         text,
