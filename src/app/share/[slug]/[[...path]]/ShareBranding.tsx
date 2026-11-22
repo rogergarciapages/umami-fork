@@ -13,9 +13,15 @@ export function ShareBranding({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
   const customLogo = shareConfig?.logoUrl;
   const customName = shareConfig?.brandName;
+  const headerDisplay = shareConfig?.headerDisplay || 'both';
 
-  // If hideUmamiBranding is enabled and no custom branding was provided, don't show Umami logo/name
-  if (hideBranding && !customLogo && !customName) {
+  const showLogo =
+    (headerDisplay === 'both' || headerDisplay === 'logo') && (customLogo || !hideBranding);
+  const showText =
+    (headerDisplay === 'both' || headerDisplay === 'tagline' || headerDisplay === 'title') &&
+    (customName || (!hideBranding && share?.whiteLabel?.displayName));
+
+  if (!showLogo && !showText) {
     return null;
   }
 
@@ -26,16 +32,25 @@ export function ShareBranding({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
   const content = (
     <Row alignItems="center" gap>
-      {logoImage ? (
-        <img src={logoImage} alt={logoName} style={{ height, maxWidth: 120, objectFit: 'contain' }} />
-      ) : (
-        !hideBranding && (
-          <Icon>
-            <Logo />
-          </Icon>
-        )
-      )}
-      {logoName && (
+      {showLogo &&
+        (logoImage ? (
+          <img
+            src={logoImage}
+            alt={logoName || 'Logo'}
+            referrerPolicy="no-referrer"
+            style={{ height, maxWidth: 180, objectFit: 'contain' }}
+            onError={e => {
+              (e.target as HTMLElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          !hideBranding && (
+            <Icon>
+              <Logo />
+            </Icon>
+          )
+        ))}
+      {showText && logoName && (
         <Text size={TEXT_SIZE[size]} weight="bold">
           {logoName}
         </Text>

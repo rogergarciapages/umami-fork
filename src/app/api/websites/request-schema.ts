@@ -38,7 +38,8 @@ export const createWebsiteRequestSchema = z
 export const shareConfigInputSchema = z
   .object({
     brandName: z.string().trim().max(100).optional(),
-    logoUrl: z.string().trim().max(300000).optional(),
+    logoUrl: z.string().trim().max(1000000).optional(),
+    headerDisplay: z.enum(['both', 'logo', 'tagline', 'title']).optional(),
     primaryColor: z
       .string()
       .trim()

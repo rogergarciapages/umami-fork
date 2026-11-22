@@ -403,6 +403,7 @@ export interface WhiteLabel {
 export interface ShareConfig {
   brandName?: string;
   logoUrl?: string;
+  headerDisplay?: 'both' | 'logo' | 'tagline' | 'title';
   primaryColor?: string;
   backgroundColor?: string;
   cardBackgroundColor?: string;

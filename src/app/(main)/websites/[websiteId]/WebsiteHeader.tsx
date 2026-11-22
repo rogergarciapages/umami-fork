@@ -26,16 +26,25 @@ export function WebsiteHeader({
     return null;
   }
 
-  const title = shareConfig?.brandName || website.name;
-  const icon = shareConfig?.logoUrl ? (
-    <img
-      src={shareConfig.logoUrl}
-      alt={title}
-      style={{ height: 28, width: 28, objectFit: 'contain', borderRadius: 4 }}
-    />
-  ) : (
-    <Favicon domain={website.domain} />
-  );
+  const headerDisplay = shareConfig?.headerDisplay || 'both';
+  const title = headerDisplay === 'logo' && shareConfig?.logoUrl ? '' : (shareConfig?.brandName || website.name);
+  const showIcon = headerDisplay !== 'tagline' && headerDisplay !== 'title';
+
+  const icon = showIcon ? (
+    shareConfig?.logoUrl ? (
+      <img
+        src={shareConfig.logoUrl}
+        alt={shareConfig.brandName || website.name}
+        referrerPolicy="no-referrer"
+        style={{ height: 28, maxWidth: 120, objectFit: 'contain', borderRadius: 4 }}
+        onError={e => {
+          (e.target as HTMLElement).style.display = 'none';
+        }}
+      />
+    ) : (
+      <Favicon domain={website.domain} />
+    )
+  ) : undefined;
 
   return (
     <PageHeader

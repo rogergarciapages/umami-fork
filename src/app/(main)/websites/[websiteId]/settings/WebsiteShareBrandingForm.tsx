@@ -1,9 +1,6 @@
 import {
   Button,
   Column,
-  FormButtons,
-  FormField,
-  FormSubmitButton,
   Grid,
   Heading,
   Icon,
@@ -15,14 +12,16 @@ import {
   TextField,
 } from '@umami/react-zen';
 import { type ChangeEvent, useRef, useState, useEffect } from 'react';
-import { Upload, X, RotateCcw } from 'lucide-react';
+import { Upload, X, RotateCcw, Image as ImageIcon, Type, Sparkles, AlertCircle } from 'lucide-react';
 import { useMessages, useUpdateQuery, useWebsite } from '@/components/hooks';
 import { ThemeModeSelector, type ThemeMode } from '@/components/input/ThemeModeSelector';
+import { Logo } from '@/components/svg';
 import type { ShareConfig } from '@/lib/types';
 
 const DEFAULT_SHARE_CONFIG: ShareConfig = {
   brandName: '',
   logoUrl: '',
+  headerDisplay: 'both',
   primaryColor: '',
   backgroundColor: '',
   cardBackgroundColor: '',
@@ -30,6 +29,49 @@ const DEFAULT_SHARE_CONFIG: ShareConfig = {
   defaultTheme: 'system',
   hideUmamiBranding: true,
 };
+
+function resizeImageFile(file: File, maxWidth = 400, maxHeight = 120): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (file.type === 'image/svg+xml') {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(reader.result as string);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(reader.result as string);
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 function ColorPickerField({
   label,
@@ -100,9 +142,14 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
 
   const [brandName, setBrandName] = useState(initialConfig.brandName || '');
   const [logoUrl, setLogoUrl] = useState(initialConfig.logoUrl || '');
+  const [headerDisplay, setHeaderDisplay] = useState<'both' | 'logo' | 'tagline'>(
+    (initialConfig.headerDisplay as 'both' | 'logo' | 'tagline') || 'both',
+  );
   const [primaryColor, setPrimaryColor] = useState(initialConfig.primaryColor || '');
   const [backgroundColor, setBackgroundColor] = useState(initialConfig.backgroundColor || '');
-  const [cardBackgroundColor, setCardBackgroundColor] = useState(initialConfig.cardBackgroundColor || '');
+  const [cardBackgroundColor, setCardBackgroundColor] = useState(
+    initialConfig.cardBackgroundColor || '',
+  );
   const [textColor, setTextColor] = useState(initialConfig.textColor || '');
   const [defaultTheme, setDefaultTheme] = useState<ThemeMode>(
     (initialConfig.defaultTheme as ThemeMode) || 'system',
@@ -111,6 +158,7 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
     initialConfig.hideUmamiBranding ?? true,
   );
   const [fileError, setFileError] = useState<string | null>(null);
+  const [imageLoadError, setImageLoadError] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -119,37 +167,40 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
     if (config) {
       setBrandName(config.brandName || '');
       setLogoUrl(config.logoUrl || '');
+      setHeaderDisplay(config.headerDisplay || 'both');
       setPrimaryColor(config.primaryColor || '');
       setBackgroundColor(config.backgroundColor || '');
       setCardBackgroundColor(config.cardBackgroundColor || '');
       setTextColor(config.textColor || '');
       setDefaultTheme(config.defaultTheme || 'system');
       setHideUmamiBranding(config.hideUmamiBranding ?? true);
+      setImageLoadError(false);
     }
   }, [website]);
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 150 * 1024) {
-      setFileError('El archivo excede el tamaño máximo recomendado (150 KB).');
+    if (file.size > 5 * 1024 * 1024) {
+      setFileError('El archivo excede el tamaño máximo permitido (5 MB).');
       return;
     }
     setFileError(null);
+    setImageLoadError(false);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setLogoUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const optimizedDataUrl = await resizeImageFile(file, 400, 120);
+      setLogoUrl(optimizedDataUrl);
+    } catch {
+      setFileError('Error al procesar la imagen.');
+    }
   };
 
   const handleResetDefaults = () => {
     setBrandName(DEFAULT_SHARE_CONFIG.brandName || '');
     setLogoUrl(DEFAULT_SHARE_CONFIG.logoUrl || '');
+    setHeaderDisplay('both');
     setPrimaryColor(DEFAULT_SHARE_CONFIG.primaryColor || '');
     setBackgroundColor(DEFAULT_SHARE_CONFIG.backgroundColor || '');
     setCardBackgroundColor(DEFAULT_SHARE_CONFIG.cardBackgroundColor || '');
@@ -157,12 +208,14 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
     setDefaultTheme('system');
     setHideUmamiBranding(true);
     setFileError(null);
+    setImageLoadError(false);
   };
 
   const handleSave = async () => {
     const shareConfig: ShareConfig = {
       brandName: brandName.trim() || undefined,
       logoUrl: logoUrl.trim() || undefined,
+      headerDisplay,
       primaryColor: primaryColor.trim() || undefined,
       backgroundColor: backgroundColor.trim() || undefined,
       cardBackgroundColor: cardBackgroundColor.trim() || undefined,
@@ -185,6 +238,12 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
     );
   };
 
+  const displayOptions = [
+    { id: 'both' as const, label: 'Ambos (Logo y Texto)', icon: <Sparkles size={15} /> },
+    { id: 'logo' as const, label: 'Solo Logo', icon: <ImageIcon size={15} /> },
+    { id: 'tagline' as const, label: 'Solo Texto / Tagline', icon: <Type size={15} /> },
+  ];
+
   return (
     <Column gap="4">
       <Row justifyContent="space-between" alignItems="center">
@@ -197,11 +256,10 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
       </Row>
 
       {error && <Text color="red">{getErrorMessage(error)}</Text>}
-      {fileError && <Text color="red">{fileError}</Text>}
 
       <Grid columns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap="4">
         <Column gap="1">
-          <Label>Nombre de Marca / Título del Reporte</Label>
+          <Label>Nombre de Marca / Título del Reporte (Tagline)</Label>
           <TextField
             value={brandName}
             placeholder={website?.name || 'Mi Marca Analytics'}
@@ -214,8 +272,12 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
           <Row gap="2" alignItems="center">
             <TextField
               value={logoUrl}
-              placeholder="https://ejemplo.com/logo.svg o data:image/..."
-              onChange={setLogoUrl}
+              placeholder="https://ejemplo.com/logo.svg o subir archivo"
+              onChange={val => {
+                setLogoUrl(val);
+                setImageLoadError(false);
+                setFileError(null);
+              }}
             />
             <input
               type="file"
@@ -234,6 +296,9 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
               </Icon>
             </Button>
           </Row>
+
+          {fileError && <Text color="red">{fileError}</Text>}
+
           {logoUrl && (
             <Row
               alignItems="center"
@@ -250,12 +315,18 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
               <img
                 src={logoUrl}
                 alt="Vista previa del logo"
-                style={{ maxHeight: 36, maxWidth: 120, objectFit: 'contain' }}
+                referrerPolicy="no-referrer"
+                onLoad={() => setImageLoadError(false)}
+                onError={() => setImageLoadError(true)}
+                style={{ maxHeight: 36, maxWidth: 160, objectFit: 'contain' }}
               />
               <Button
                 size="sm"
                 variant="quiet"
-                onPress={() => setLogoUrl('')}
+                onPress={() => {
+                  setLogoUrl('');
+                  setImageLoadError(false);
+                }}
                 aria-label="Quitar logo"
               >
                 <Icon size="sm">
@@ -264,8 +335,76 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
               </Button>
             </Row>
           )}
+
+          {imageLoadError && (
+            <Row alignItems="center" gap="1" style={{ marginTop: 4 }}>
+              <Icon color="red" size="sm">
+                <AlertCircle size={14} />
+              </Icon>
+              <Text color="red" size="sm">
+                No se pudo cargar la imagen desde la URL. Comprueba que sea una URL directa y accesible (.png, .jpg, .svg) o sube el archivo directamente (↑).
+              </Text>
+            </Row>
+          )}
         </Column>
       </Grid>
+
+      {/* Selector de visualización en el Navbar */}
+      <Column gap="2">
+        <Label>Mostrar en la barra superior (Navbar)</Label>
+        <Row gap="2" wrap="wrap">
+          {displayOptions.map(({ id, label, icon }) => (
+            <Button
+              key={id}
+              variant={headerDisplay === id ? 'primary' : undefined}
+              onPress={() => setHeaderDisplay(id)}
+            >
+              <Icon size="sm">{icon}</Icon>
+              {label}
+            </Button>
+          ))}
+        </Row>
+      </Column>
+
+      {/* Vista previa en vivo del Navbar */}
+      <Column gap="1">
+        <Label>Vista previa en vivo del Header Navbar</Label>
+        <div
+          style={{
+            padding: '12px 18px',
+            borderRadius: 8,
+            border: '1px solid var(--zen-border)',
+            backgroundColor: backgroundColor || 'var(--zen-surface-raised, var(--zen-surface))',
+            color: textColor || 'inherit',
+            display: 'flex',
+            alignItems: 'center',
+            minHeight: 52,
+          }}
+        >
+          <Row alignItems="center" gap="3">
+            {(headerDisplay === 'both' || headerDisplay === 'logo') &&
+              (logoUrl && !imageLoadError ? (
+                <img
+                  src={logoUrl}
+                  alt={brandName || 'Logo'}
+                  referrerPolicy="no-referrer"
+                  style={{ maxHeight: 32, maxWidth: 180, objectFit: 'contain' }}
+                />
+              ) : (
+                !hideUmamiBranding && (
+                  <Icon>
+                    <Logo />
+                  </Icon>
+                )
+              ))}
+            {(headerDisplay === 'both' || headerDisplay === 'tagline') && (
+              <Text weight="bold" size="base" style={{ color: textColor || 'inherit' }}>
+                {brandName || website?.name || 'Mi Marca Analytics'}
+              </Text>
+            )}
+          </Row>
+        </div>
+      </Column>
 
       <Grid columns={{ base: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }} gap="4">
         <ColorPickerField
