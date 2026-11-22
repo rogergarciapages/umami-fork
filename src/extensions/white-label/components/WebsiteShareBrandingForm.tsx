@@ -1,3 +1,4 @@
+'use client';
 import {
   Button,
   Column,
@@ -16,62 +17,8 @@ import { Upload, X, RotateCcw, Image as ImageIcon, Type, Sparkles, AlertCircle }
 import { useMessages, useUpdateQuery, useWebsite } from '@/components/hooks';
 import { ThemeModeSelector, type ThemeMode } from '@/components/input/ThemeModeSelector';
 import { Logo } from '@/components/svg';
-import type { ShareConfig } from '@/lib/types';
-
-const DEFAULT_SHARE_CONFIG: ShareConfig = {
-  brandName: '',
-  logoUrl: '',
-  headerDisplay: 'both',
-  primaryColor: '',
-  backgroundColor: '',
-  cardBackgroundColor: '',
-  textColor: '',
-  defaultTheme: 'system',
-  hideUmamiBranding: true,
-};
-
-function resizeImageFile(file: File, maxWidth = 400, maxHeight = 120): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (file.type === 'image/svg+xml') {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(reader.result as string);
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.onerror = () => resolve(reader.result as string);
-      img.src = reader.result as string;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+import { DEFAULT_SHARE_CONFIG, type HeaderDisplayMode, type ShareConfig } from '../types';
+import { resizeImageFile } from '../helpers';
 
 function ColorPickerField({
   label,
@@ -142,8 +89,8 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
 
   const [brandName, setBrandName] = useState(initialConfig.brandName || '');
   const [logoUrl, setLogoUrl] = useState(initialConfig.logoUrl || '');
-  const [headerDisplay, setHeaderDisplay] = useState<'both' | 'logo' | 'tagline'>(
-    (initialConfig.headerDisplay as 'both' | 'logo' | 'tagline') || 'both',
+  const [headerDisplay, setHeaderDisplay] = useState<HeaderDisplayMode>(
+    initialConfig.headerDisplay || 'both',
   );
   const [primaryColor, setPrimaryColor] = useState(initialConfig.primaryColor || '');
   const [backgroundColor, setBackgroundColor] = useState(initialConfig.backgroundColor || '');

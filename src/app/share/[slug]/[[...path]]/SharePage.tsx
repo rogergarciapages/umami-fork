@@ -26,6 +26,7 @@ import { useShare } from '@/components/hooks';
 import { MobileMenuButton } from '@/components/input/MobileMenuButton';
 import { ENTITY_TYPE } from '@/lib/constants';
 import { getShareTheme } from '@/lib/share';
+import { getShareBrandingStyles } from '@/extensions/white-label';
 import { ShareFooter } from './ShareFooter';
 import { ShareNav } from './ShareNav';
 
@@ -87,29 +88,7 @@ export function SharePage() {
     };
   }, [shareTheme, shareConfig?.defaultTheme, initTheme]);
 
-  const shareStyles = useMemo<React.CSSProperties>(() => {
-    if (!shareConfig) return {};
-    const styles: Record<string, string> = {};
-    if (shareConfig.primaryColor) {
-      styles['--share-primary'] = shareConfig.primaryColor;
-      styles['--zen-primary'] = shareConfig.primaryColor;
-    }
-    if (shareConfig.backgroundColor) {
-      styles['--share-bg'] = shareConfig.backgroundColor;
-      styles['--zen-surface-raised'] = shareConfig.backgroundColor;
-      styles['backgroundColor'] = shareConfig.backgroundColor;
-    }
-    if (shareConfig.cardBackgroundColor) {
-      styles['--share-card-bg'] = shareConfig.cardBackgroundColor;
-      styles['--zen-surface'] = shareConfig.cardBackgroundColor;
-    }
-    if (shareConfig.textColor) {
-      styles['--share-text-color'] = shareConfig.textColor;
-      styles['--zen-fg'] = shareConfig.textColor;
-      styles['color'] = shareConfig.textColor;
-    }
-    return styles as React.CSSProperties;
-  }, [shareConfig]);
+  const shareStyles = useMemo(() => getShareBrandingStyles(shareConfig), [shareConfig]);
 
   // Check if the requested path is allowed
   const pageKey = path || '';

@@ -3,7 +3,7 @@ import { Panel } from '@/components/common/Panel';
 import { WebsiteData } from './WebsiteData';
 import { WebsiteEditForm } from './WebsiteEditForm';
 import { WebsiteReplaySettings } from './WebsiteReplaySettings';
-import { WebsiteShareBrandingForm } from './WebsiteShareBrandingForm';
+import { WebsiteShareBrandingForm } from '@/extensions/white-label';
 import { WebsiteShareForm } from './WebsiteShareForm';
 import { WebsiteTrackingCode } from './WebsiteTrackingCode';
 

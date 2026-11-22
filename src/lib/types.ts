@@ -400,14 +400,4 @@ export interface WhiteLabel {
   logoUrl: string;
 }
 
-export interface ShareConfig {
-  brandName?: string;
-  logoUrl?: string;
-  headerDisplay?: 'both' | 'logo' | 'tagline' | 'title';
-  primaryColor?: string;
-  backgroundColor?: string;
-  cardBackgroundColor?: string;
-  textColor?: string;
-  defaultTheme?: 'system' | 'light' | 'dark';
-  hideUmamiBranding?: boolean;
-}
+export type { ShareConfig, HeaderDisplayMode } from '@/extensions/white-label';
