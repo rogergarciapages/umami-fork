@@ -1,4 +1,4 @@
-import type { Prisma } from '@/generated/prisma/client';
+import { Prisma } from '@/generated/prisma/client';
 import { ENTITY_TYPE } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { getRecorderConfig, getRecorderEnabled } from '@/lib/recorder';

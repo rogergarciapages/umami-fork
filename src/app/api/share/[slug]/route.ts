@@ -131,7 +131,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     parameters: share.parameters,
   };
 
-  let entity: { userId?: string; teamId?: string } | null = null;
+  let entity: { userId?: string; teamId?: string; shareConfig?: any } | null = null;
 
   if (share.shareType === ENTITY_TYPE.board) {
     const board = await getBoard(share.entityId);

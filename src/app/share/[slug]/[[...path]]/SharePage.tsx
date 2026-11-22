@@ -1,7 +1,7 @@
 'use client';
 import { Column, Grid, Row, useTheme } from '@umami/react-zen';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BoardViewPage } from '@/app/(main)/boards/[boardId]/BoardViewPage';
 import { LinkPage } from '@/app/(main)/links/[linkId]/LinkPage';
 import { PixelPage } from '@/app/(main)/pixels/[pixelId]/PixelPage';

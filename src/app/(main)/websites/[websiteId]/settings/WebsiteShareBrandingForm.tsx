@@ -196,8 +196,8 @@ export function WebsiteShareBrandingForm({ websiteId }: { websiteId: string }) {
         </Column>
       </Row>
 
-      {error && <Text color="danger">{getErrorMessage(error)}</Text>}
-      {fileError && <Text color="danger">{fileError}</Text>}
+      {error && <Text color="red">{getErrorMessage(error)}</Text>}
+      {fileError && <Text color="red">{fileError}</Text>}
 
       <Grid columns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap="4">
         <Column gap="1">
