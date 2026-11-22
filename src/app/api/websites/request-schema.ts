@@ -35,7 +35,7 @@ export const createWebsiteRequestSchema = z
   })
   .meta({ id: 'CreateWebsiteRequest' });
 
-import { shareConfigInputSchema } from '@/extensions/white-label';
+import { shareConfigInputSchema } from '@/extensions/white-label/schema';
 
 export { shareConfigInputSchema };
 

@@ -3137,6 +3137,20 @@ export interface components {
       /** @description Fraction of sessions to record for replay, from 0 to 1. */
       sampleRate?: number;
     };
+    ShareConfigInput: {
+      backgroundColor?: string | '';
+      brandName?: string;
+      cardBackgroundColor?: string | '';
+      /** @enum {string} */
+      defaultTheme?: 'system' | 'light' | 'dark';
+      /** @enum {string} */
+      headerDisplay?: 'both' | 'logo' | 'tagline' | 'title';
+      hideUmamiBranding?: boolean;
+      /** @description URL of the logo image. */
+      logoUrl?: string;
+      primaryColor?: string | '';
+      textColor?: string | '';
+    };
     TimeSeriesPoint: {
       /** @description Bucket start (ISO date/time). */
       x: string;
@@ -3150,6 +3164,7 @@ export interface components {
       name?: string;
       /** @description Session replay and heatmap recording configuration. */
       replayConfig?: components['schemas']['ReplayConfigInput'] | null;
+      shareConfig?: components['schemas']['ShareConfigInput'] | null;
       /** @description Identifier used to access a shared resource. */
       shareId?: string | null;
     };

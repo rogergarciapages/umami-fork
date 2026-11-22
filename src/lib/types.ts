@@ -400,4 +400,4 @@ export interface WhiteLabel {
   logoUrl: string;
 }
 
-export type { ShareConfig, HeaderDisplayMode } from '@/extensions/white-label';
+export type { ShareConfig, HeaderDisplayMode } from '@/extensions/white-label/types';
