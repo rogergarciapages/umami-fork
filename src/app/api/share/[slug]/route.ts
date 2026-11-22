@@ -167,7 +167,20 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     return notFound();
   }
 
-  data.token = createToken({ ...data, type: SHARE_TOKEN_TYPE }, secret());
+  const tokenPayload: Record<string, any> = {
+    shareId: data.shareId,
+    shareType: data.shareType,
+    parameters: data.parameters,
+    type: SHARE_TOKEN_TYPE,
+  };
+
+  if (data.websiteId) tokenPayload.websiteId = data.websiteId;
+  if (data.websiteIds) tokenPayload.websiteIds = data.websiteIds;
+  if (data.boardId) tokenPayload.boardId = data.boardId;
+  if (data.pixelId) tokenPayload.pixelId = data.pixelId;
+  if (data.linkId) tokenPayload.linkId = data.linkId;
+
+  data.token = createToken(tokenPayload, secret());
 
   const accountId = await getAccountId(entity);
 
